@@ -1,0 +1,100 @@
+name: Java CI-CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ---------------------------
+    # Checkout Code
+    # ---------------------------
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # ---------------------------
+    # Set up JDK
+    # ---------------------------
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: "17"
+        distribution: "temurin"
+
+    # ---------------------------
+    # Build with Maven
+    # ---------------------------
+    - name: Build Maven Project
+      working-directory: java-webapp-region
+      run: mvn clean package
+
+    # ---------------------------
+    # SonarQube Scan
+    # ---------------------------
+    - name: SonarQube Analysis
+      working-directory: java-webapp-region
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        mvn sonar:sonar \
+        -Dsonar.projectKey=java-webapp-region \
+        -Dsonar.host.url=http://34.232.252.221:9000 \
+        -Dsonar.login=$SONAR_TOKEN
+
+    # ---------------------------
+    # Deploy to Nexus
+    # ---------------------------
+    - name: Deploy Artifact to Nexus
+      working-directory: java-webapp-region
+      env:
+        NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      run: |
+        cat > settings.xml <<EOF
+        <settings>
+          <servers>
+            <server>
+              <id>maven-releases</id>
+              <username>${NEXUS_USERNAME}</username>
+              <password>${NEXUS_PASSWORD}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        mvn deploy -s settings.xml
+
+    # ---------------------------
+    # Build Docker Image
+    # ---------------------------
+    - name: Build Docker image
+      run: |
+        docker build -t java-image java-webapp-region
+        docker tag java-image ${{ secrets.DOCKER_HUB_USERNAME }}/java-image:latest
+
+    # ---------------------------
+    # Push to Docker Hub
+    # ---------------------------
+    - name: Login and Push Docker Image
+      run: |
+        echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/java-image:latest
+
+    # ---------------------------
+    # Deploy to Tomcat (SSH into your server)
+    # ---------------------------
+    - name: Deploy on Server (Docker Run)
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: YOUR_SERVER_PUBLIC_IP
+        username: ubuntu
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker stop TOMCAT || true
+          docker rm TOMCAT || true
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/java-image:latest
+          docker run -d --name TOMCAT -p 8082:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/java-image:latest
