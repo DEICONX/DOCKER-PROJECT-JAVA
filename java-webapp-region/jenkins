@@ -1,0 +1,129 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'JDK' // Your JDK installation name in Jenkins
+        maven 'MAVEN' // Optional: If you have Maven tool configured
+    }
+
+    environment {
+        JAVA_HOME = tool name: 'JDK', type: 'jdk'
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+
+        // SonarQube credential ID in Jenkins
+        SONARQUBE = 'SONAR'
+
+        // Docker Hub credential (username/password stored in Jenkins)
+        DOCKER_HUB = credentials('docker_hub')
+        
+        // Nexus credentials
+        NEXUS_CREDENTIAL_ID = 'nexus-cred'
+        NEXUS_SERVER_ID = 'maven-releases'
+        NEXUS_URL = 'http://34.232.252.221:8081/repository/maven-releases/'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/DEICONX/DOCKER-PROJECT-JAVA.git'
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                dir('java-webapp-region') {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('java-webapp-region') {
+                    withSonarQubeEnv('SONAR') {
+                        sh """
+                            mvn sonar:sonar \\
+                            -Dsonar.projectKey=java-webapp-region \\
+                            -Dsonar.host.url=http://34.232.252.221:9000
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                dir('java-webapp-region') {
+                    // Create a temporary Maven settings.xml with Nexus credentials
+                    withCredentials([usernamePassword(
+                        credentialsId: env.NEXUS_CREDENTIAL_ID, 
+                        usernameVariable: 'NEXUS_USERNAME', 
+                        passwordVariable: 'NEXUS_PASSWORD'
+                    )]) {
+                        writeFile file: 'temp-settings.xml', text: """
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <servers>
+    <server>
+      <id>${env.NEXUS_SERVER_ID}</id>
+      <username>${NEXUS_USERNAME}</username>
+      <password>${NEXUS_PASSWORD}</password>
+    </server>
+  </servers>
+</settings>
+                        """
+                        sh 'mvn deploy -s temp-settings.xml'
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                    docker build -t java-image java-webapp-region
+                    docker tag java-image deiconx/java-image:latest
+                """
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker_hub',
+                    usernameVariable: 'DOCKER_HUB_USR',
+                    passwordVariable: 'DOCKER_HUB_PSW'
+                )]) {
+                    sh """
+                        echo ${DOCKER_HUB_PSW} | docker login -u ${DOCKER_HUB_USR} --password-stdin
+                        docker push deiconx/java-image:latest
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                sh """
+                    docker stop TOMCAT || true
+                    docker rm TOMCAT || true
+                    docker run -d --name TOMCAT -p 8082:8080 deiconx/java-image:latest
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished."
+        }
+        success {
+            echo "Pipeline succeeded! All steps completed."
+        }
+        failure {
+            echo "Pipeline failed! Check logs for details."
+        }
+    }
+}
