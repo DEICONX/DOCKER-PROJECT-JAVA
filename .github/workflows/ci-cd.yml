@@ -90,7 +90,7 @@ jobs:
     - name: Deploy on Server (Docker Run)
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: YOUR_SERVER_PUBLIC_IP
+        host: 34.232.252.221
         username: ubuntu
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
