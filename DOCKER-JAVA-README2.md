@@ -11,13 +11,13 @@ This document explains the complete CI/CD pipeline for a Java application using:
 ---
 
 ## **Prerequisites**
-AWS Ubuntu Server (EC2)![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 134206.png)
+AWS Ubuntu Server (EC2)![](Screenshot%202025-11-14%20134206.png)
 
 --------
 
 GitHub Repository with Java Code
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-16 160704.png)
+![](Screenshot%202025-11-16%20160704.png)
 
 ---------------
 
@@ -56,7 +56,7 @@ sudo apt-get update
 sudo apt-get install docker.io -y
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 134240.png)
+![](Screenshot%202025-11-14%20134240.png)
 
 ### **4. Pull Required Docker Images**(From DOCKER HUB)
 
@@ -66,7 +66,7 @@ docker pull sonatype/nexus3
 docker pull jenkins/jenkins
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 134605.png)
+![](Screenshot%202025-11-14%20134605.png)
 
 ### **5. Create Containers**
 
@@ -77,7 +77,7 @@ docker run -dt --name nexus -p 8081:8081 sonatype/nexus3
 docker run -dt --name jenkins -p 8080:8080 jenkins/jenkins
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 135118.png)
+![](Screenshot%202025-11-14%20135118.png)
 
 ### **6. Install Maven**
 
@@ -92,13 +92,13 @@ Run scanner:
 sonar-scanner   -Dsonar.projectKey=my-java-app   -Dsonar.sources=.   -Dsonar.host.url=http://<sonarqube-ip>:9000   -Dsonar.login=<sonar-token>
 ```
 
-<img src="C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 150340.png" style="zoom:75%;" />
+![](Screenshot%202025-11-14%20150340.png)
 
 -----
 
 Output of Sonarweb page Success!!
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 150444.png)
+![](Screenshot%202025-11-14%20150444.png)
 
 ### **8. Build Java Project**
 
@@ -106,13 +106,13 @@ Output of Sonarweb page Success!!
 mvn clean install
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 152138.png)
+![](Screenshot%202025-11-14%20152138.png)
 
 ----------------
 
 Artifact is Generated!!!!
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 152157.png)
+![](Screenshot%202025-11-14%20152157.png)
 
 ### **9. Upload Artifact to Nexus**
 
@@ -130,13 +130,13 @@ Deploy:
 mvn deploy
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 152617.png)
+![](Screenshot%202025-11-14%20152617.png)
 
 ---------
 
 Artifact uploaded in nexus!!!!
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 152632.png)
+![](Screenshot%202025-11-14%20152632.png)
 
 ### **10. Create Dockerfile**
 
@@ -164,13 +164,13 @@ EXPOSE 8080
 CMD ["catalina.sh", "run"]
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154343.png)
+![](Screenshot%202025-11-14%20154343.png)
 
 -------------
 
 Also create nexus-credentials.txt file and give nexus username and password
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154402.png)
+![](Screenshot%202025-11-14%20154402.png)
 
 ### **11. Build & Push Image**
 
@@ -178,13 +178,13 @@ Also create nexus-credentials.txt file and give nexus username and password
 docker build -t myapp:latest .
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154414.png)
+![](Screenshot%202025-11-14%20154414.png)
 
 ------
 
 The Image is successfully build
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154430.png)
+![](Screenshot%202025-11-14%20154430.png)
 
 ------------
 
@@ -192,7 +192,7 @@ The Image is successfully build
 
 In your browser open docker hub and signup
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154613.png)
+![](Screenshot%202025-11-14%20154613.png)
 
 ------------------
 
@@ -206,7 +206,7 @@ Here you will get URL as shown in below image
 
 Copy the code
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 154939.png)
+![](Screenshot%202025-11-14%20154939.png)
 
 ---------------
 
@@ -216,7 +216,7 @@ Your docker CLI and docker hub are connected go to repo
 
 and there generate a token/password in settings and copy that store it some where
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 155017.png)
+![](Screenshot%202025-11-14%20155017.png)
 
 --------------------
 
@@ -225,13 +225,13 @@ docker push <dockerhub-user>/myapp:latest`
 
 Use the above commands to push your image in to docker hub
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 155530.png)
+![](Screenshot%202025-11-14%20155530.png)
 
 -----------
 
 Go to your dockerhub repo you will find your image
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 155609.png)
+![](Screenshot%202025-11-14%20155609.png)
 
 -------------------
 
@@ -239,13 +239,13 @@ Now i will manually create the container with my image using
 
 `docker run -dt --name TOMCAT -p 8082:8080 <image id> `
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 155720.png)
+![](Screenshot%202025-11-14%20155720.png)
 
 --------------
 
 open Browser and run http://<your-server ip>:8082
 
-I see the out put and my application is working successfully!!!![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 155742.png)
+I see the out put and my application is working successfully!!!![](Screenshot%202025-11-14%20155742.png)
 
 -------------
 
@@ -255,7 +255,7 @@ In the above steps i have done everything manually now i will use my Jenkins con
 
 - Add credentials: Nexus, SonarQube token, Docker Hub.
 
-  ![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 162456.png)
+  ![](Screenshot%202025-11-14%20162456.png)
 
 - Install plugins: GitHub, Maven, Nexus, Docker, SonarQube Scanner.
 
@@ -291,7 +291,7 @@ In the above steps i have done everything manually now i will use my Jenkins con
 
 Create a New Item 
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 162803.png)
+![](Screenshot%202025-11-14%20162803.png)
 ----------
 
 Write Your Pipeline script
@@ -430,13 +430,13 @@ pipeline {
 
 Save and BUILD 
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-14 163342.png)
+![](Screenshot%202025-11-14%20163342.png)
 
 ------------------------
 
 Pipeline is succesfully build and the below is the pipeline overview
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 012039.png)
+![](Screenshot%202025-11-15%20012039.png)
 
 ------------------
 
@@ -444,13 +444,13 @@ WE WILL NOW SEE THE OUTPUTS OF OUR APPLICATION
 
 SONARQUBE OUTPUT:
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 012115.png)
+![](Screenshot%202025-11-15%20012115.png)
 
 ------
 
 TOMCAT OUTPUT:
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 012129.png)
+![](Screenshot%202025-11-15%20012129.png)
 
 -----
 
@@ -462,7 +462,7 @@ Give your credentials
 
 repo settings-->secrets and variables-->actions-->new repository secret
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 154545.png)
+![](Screenshot%202025-11-15%20154545.png)
 
 -----------------
 
@@ -571,13 +571,13 @@ jobs:
 
 ```
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 155120.png)
+![](Screenshot%202025-11-15%20155120.png)
 
 -----------------
 
 Pipeline is build successfully!!!!!!!!!!
 
-![](C:\Users\jagan\Downloads\DOCKJAVA-SS\Screenshot 2025-11-15 155626.png)
+![](Screenshot%202025-11-15%20155626.png)
 
 ## **Architecture Diagram**
 ```
