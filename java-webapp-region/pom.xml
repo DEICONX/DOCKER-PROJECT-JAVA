@@ -37,8 +37,15 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
-            <!-- WAR plugin -->
+            
+<!-- SonarQube Scanner plugin -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version> <!-- Latest stable -->
+            </plugin>
+            
+           <!-- WAR plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
