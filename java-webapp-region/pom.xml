@@ -42,7 +42,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.11.0.3922</version> <!-- Latest stable -->
+                <version>20.184.134.236</version> <!-- Latest stable -->
             </plugin>
             
            <!-- WAR plugin -->
@@ -59,12 +59,12 @@
     <distributionManagement>
         <repository>
             <id>maven-releases</id>
-            <url>http://13.91.242.15:8081/repository/maven-releases/</url>
+            <url>http://20.184.134.236:8081/repository/maven-releases/</url>
         </repository>
 
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>http://13.91.242.15:8081/repository/maven-snapshots/</url>
+            <url>http://20.184.134.236:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
